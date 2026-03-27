@@ -1,17 +1,15 @@
 {
   "configurations": [
     {
-      "name": "windows-gcc-x64",
+      "name": "WSL",
       "includePath": [
+        "/usr/include",
+        "/usr/include/x86_64-linux-gnu",
         "${workspaceFolder}/**"
       ],
-      "compilerPath": "gcc",
-      "cStandard": "${default}",
-      "cppStandard": "${default}",
-      "intelliSenseMode": "windows-gcc-x64",
-      "compilerArgs": [
-        ""
-      ]
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "c11",
+      "intelliSenseMode": "linux-gcc-x64"
     }
   ],
   "version": 4
