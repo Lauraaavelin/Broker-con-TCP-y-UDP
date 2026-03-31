@@ -9,10 +9,15 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <stdbool.h>
 
-#define PUERTO_BROKER 5000      // puerto del broker
+#define PUERTO_BROKER 5522     // puerto del broker
 #define TAMANO_BUFFER 1024      // buffer temporal para mensajes
-#define TEMA_POR_DEFECTO "partido1"
+const char *TOPICOS_VALIDOS[3] = {
+    "Santa_Fe_vs_Millonarios",
+    "Uniandes_vs_Javeriana",
+    "Colombia_vs_Francia"
+}; // lista fija de tópicos permitidos por el broker
 #define TOTAL_MENSAJES 10       // minimo pedido por el laboratorio
 
 int main(int argc, char *argv[]) {
@@ -22,7 +27,6 @@ int main(int argc, char *argv[]) {
     char buffer[TAMANO_BUFFER];
     char publicacion[TAMANO_BUFFER];
     const char *ip_broker = "127.0.0.1";
-    const char *tema = TEMA_POR_DEFECTO;
     ssize_t bytes_recibidos;
 
     if (argc >= 2) {
@@ -68,43 +72,66 @@ int main(int argc, char *argv[]) {
     }
 
     // enviar 10 publicaciones
-    for (i = 1; i <= TOTAL_MENSAJES; i++) {
-        snprintf(
-            publicacion,
-            sizeof(publicacion),
-            "PUB %s Gol del equipo A minuto %d\n",
-            tema,
-            i * 5
-        );
+    //TODO esto hay que cambiarlo para que el publicador publique lo que esta en el archivo txt en lugar de generar mensajes de ejemplo
+    // en el txt hay un mensaje por linea con el formato "TOPICO: MENSAJE", el publicador debe leer cada linea, extraer el topico y el mensaje, y enviar una publicacion al broker con ese formato, ademas de imprimir en consola lo que esta publicando
+    // El usuario solo ingresa el nombre del archivo txt por consola despues de ejecutar el programa, y el programa debe abrir ese archivo, leerlo linea por linea, y publicar cada mensaje al broker con el formato adecuado, ademas de imprimir en consola lo que esta publicando.
+  
 
-        if (send(socket_cliente, publicacion, strlen(publicacion), 0) < 0) {
-            perror("send");
-            close(socket_cliente);
-            return 1;
+
+
+    bool publicar_mas = true;
+
+    while (publicar_mas) {
+        char nombre_archivo[256];
+        printf("Ingrese el nombre del archivo: ");
+        scanf("%255s", nombre_archivo);
+
+        FILE *archivo = fopen(nombre_archivo, "r");
+        if (!archivo) {
+            perror("fopen");
+            continue;
         }
 
-        printf("publicacion enviada: %s", publicacion);
+        char linea[TAMANO_BUFFER];
 
-        memset(buffer, 0, sizeof(buffer));
-        bytes_recibidos = recv(socket_cliente, buffer, sizeof(buffer) - 1, 0);
-        if (bytes_recibidos < 0) {
-            perror("recv");
-            close(socket_cliente);
-            return 1;
+        while (fgets(linea, sizeof(linea), archivo)) {
+
+            char *sep = strchr(linea, ':');
+            if (!sep) continue;
+
+            *sep = '\0';
+            char *topico = linea;
+            char *mensaje = sep + 1;
+
+            while (*mensaje == ' ') mensaje++;
+            mensaje[strcspn(mensaje, "\r\n")] = '\0';
+
+            snprintf(publicacion, sizeof(publicacion),
+                    "PUB %s %s\n", topico, mensaje);
+
+            if (send(socket_cliente, publicacion, strlen(publicacion), 0) < 0) {
+                perror("send");
+                break;
+            }
+
+            printf("Publicado: %s", publicacion);
+
+            // leer respuesta del broker
+            ssize_t n = recv(socket_cliente, buffer, sizeof(buffer) - 1, 0);
+            if (n > 0) {
+                buffer[n] = '\0';
+                printf("Broker: %s", buffer);
+            }
         }
 
-        if (bytes_recibidos == 0) {
-            printf("el broker cerro la conexion\n");
-            close(socket_cliente);
-            return 1;
-        }
+        fclose(archivo);
 
-        buffer[bytes_recibidos] = '\0';
-        printf("%s", buffer);
+        char opcion[5];
+        printf("¿Desea continuar? (s/n): ");
+        scanf("%9s", opcion);
 
-        sleep(1);
+        publicar_mas = (strcmp(opcion, "s") == 0);
     }
-
     close(socket_cliente);
     return 0;
 }
