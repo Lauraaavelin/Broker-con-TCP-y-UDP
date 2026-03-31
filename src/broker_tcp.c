@@ -45,6 +45,21 @@ const char *TOPICOS_VALIDOS[3] = {
     "Colombia_vs_Francia"
 }; // topicos fijos definidos por el broker
 
+void cerrar_todo_y_salir(int codigo);
+void manejar_ctrl_c(int senal);
+void inicializar_clientes(void);
+int agregar_cliente(int socket_nuevo, struct sockaddr_in *direccion_cliente);
+void eliminar_cliente(int indice);
+void enviar_texto(int socket_destino, const char *texto);
+int topico_es_valido(const char *topico);
+int cliente_tiene_topico(int indice_cliente, const char *topico);
+void agregar_topico_a_cliente(int indice_cliente, const char *topico);
+void registrar_rol_publisher(int indice_cliente);
+void registrar_rol_subscriber(int indice_cliente);
+void registrar_suscripcion(int indice, const char *topico);
+void publicar_mensaje(int indice_publicador, const char *topico, const char *mensaje);
+void procesar_mensaje_cliente(int indice, char *buffer);
+
 int main(void) {
     int resultado_bind; // guardara 0 si bind sale bien y -1 si falla
     int resultado_listen; // guardara 0 si listen sale bien y -1 si falla
