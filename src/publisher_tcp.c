@@ -13,7 +13,7 @@
 #include <stdbool.h> // bool, true, false
 
 #define PUERTO_BROKER 5222 // puerto actual del broker
-#define TAMANO_BUFFER 1024 // buffer temporal para mensajes
+#define TAMANO_BUFFER 2048 // buffer temporal para mensajes
 
 int main(void) {
     int socket_cliente; // descriptor del socket del publicador
