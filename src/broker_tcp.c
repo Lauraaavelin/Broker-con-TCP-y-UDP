@@ -17,7 +17,7 @@
 #define PUERTO 5222 // puerto fijo del broker
 #define BACKLOG 5 // máximo de conexiones pendientes en cola para hacer accept
 #define MAX_CLIENTES 10 // máximo de clientes simultáneos
-#define TAM_BUFFER 1024 // tamaño del buffer de lectura
+#define TAM_BUFFER 2048 // tamaño del buffer de lectura
 #define MAX_TOPICOS 10 // máximo de tópicos por cliente
 #define MAX_NOMBRE_TOPICO 64 // tamaño máximo del nombre del tópico
 
