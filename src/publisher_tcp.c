@@ -112,8 +112,17 @@ int main(void) {
             topico[strcspn(topico, "\r\n")] = '\0'; // elimina salto de linea del topico si lo hubiera
             mensaje[strcspn(mensaje, "\r\n")] = '\0'; // elimina salto de linea del mensaje
 
-            snprintf(publicacion, sizeof(publicacion), "PUB %s %s\n", topico, mensaje); // construye el comando PUB en el formato esperado por el broker
+            size_t max_mensaje = sizeof(publicacion)
+                            - strlen("PUB ")
+                            - strlen(topico)
+                            - strlen("\n")
+                            - 1;
 
+            if (strlen(mensaje) > max_mensaje) {
+                mensaje[max_mensaje] = '\0';
+            }
+
+            snprintf(publicacion, sizeof(publicacion), "PUB %s %s\n", topico, mensaje);
             if (send(socket_cliente, publicacion, strlen(publicacion), 0) < 0) { // envia la publicacion al broker
                 perror("send");
                 break;
