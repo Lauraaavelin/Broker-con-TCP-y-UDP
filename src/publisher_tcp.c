@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-#define PUERTO_BROKER 5000      // puerto del broker
+#define PUERTO_BROKER 5522     // puerto del broker
 #define TAMANO_BUFFER 1024      // buffer temporal para mensajes
 const char *TOPICOS_VALIDOS[3] = {
     "Santa_Fe_vs_Millonarios",
