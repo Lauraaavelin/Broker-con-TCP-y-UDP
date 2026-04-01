@@ -66,4 +66,330 @@ Este proyecto consiste en una plataforma de distribución de noticias de fútbol
 
 
 ## 3. Sockets TCP
-Aqui ira todo lo de TCP y la explicacion de la implementación 
+Aquí tienes una documentación clara y profunda lista para usar en tu README sobre `<sys/socket.h>`:
+
+---
+
+# `<sys/socket.h>` – Documentación técnica
+
+La librería `<sys/socket.h>` proporciona la interfaz en C para utilizar sockets, que son el mecanismo estándar de comunicación entre procesos a través de red en sistemas tipo Unix (Linux, BSD, etc.). Esta librería no implementa la lógica de red por sí misma; actúa como un puente entre el espacio de usuario y el kernel, donde reside la pila de red (TCP/IP).
+
+---
+
+# 1. Concepto de socket
+
+Un socket es un descriptor de archivo que representa un endpoint de comunicación. Internamente, al crear un socket, el kernel asigna una estructura que contiene:
+
+* Tipo de socket (TCP, UDP, etc.)
+* Buffers de envío y recepción
+* Estado de la conexión (en TCP)
+* Referencias al protocolo subyacente
+
+Desde el programa, el socket se maneja como un entero (`int`), pero en el kernel está asociado a estructuras complejas que gestionan la comunicación.
+
+---
+
+# 2. Flujo general de comunicación
+
+## Publicador
+
+```text
+socket() → bind() → listen() → accept() → recv()/send() → close()
+```
+
+## Subscriptor
+
+```text
+socket() → connect() → send()/recv() → close()
+```
+
+---
+
+# 3. Funciones principales
+
+## 3.1 `socket()`
+
+```c
+int socket(int domain, int type, int protocol);
+```
+
+Crea un socket y devuelve un descriptor de archivo.
+
+* `domain`: familia de direcciones (ej. `AF_INET` para IPv4)
+* `type`: tipo de socket (`SOCK_STREAM` para TCP, `SOCK_DGRAM` para UDP)
+* `protocol`: normalmente 0 (el sistema selecciona el adecuado)
+
+Internamente, el kernel:
+
+* Reserva estructuras de socket
+* Asocia el protocolo correspondiente
+* Devuelve un descriptor
+
+---
+
+## 3.2 `bind()`
+
+```c
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+```
+
+Asocia un socket a una dirección (IP y puerto).
+
+El kernel registra esta asociación en una tabla interna para poder enrutar conexiones entrantes.
+
+---
+
+## 3.3 `listen()`
+
+```c
+int listen(int sockfd, int backlog);
+```
+
+Marca un socket como pasivo (servidor) y define una cola de conexiones pendientes.
+
+Internamente se crean:
+
+* Cola de conexiones en proceso (SYN queue)
+* Cola de conexiones establecidas (accept queue)
+
+---
+
+## 3.4 `accept()`
+
+```c
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+```
+
+Acepta una conexión entrante.
+
+* No reutiliza el socket original
+* Crea un nuevo descriptor para la conexión específica con el cliente
+
+---
+
+## 3.5 `connect()`
+
+```c
+int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+```
+
+Inicia una conexión desde el cliente hacia el servidor.
+
+En TCP:
+
+* Envía SYN
+* Espera SYN-ACK
+* Envía ACK
+
+El socket pasa a estado `ESTABLISHED`.
+
+---
+
+## 3.6 `send()`
+
+```c
+ssize_t send(int sockfd, const void *buf, size_t len, int flags);
+```
+
+Envía datos a través del socket.
+
+Importante:
+
+* No envía directamente a la red
+* Copia los datos al buffer del kernel
+* El kernel decide cuándo transmitirlos
+
+Puede enviar menos bytes de los solicitados.
+
+---
+
+## 3.7 `recv()`
+
+```c
+ssize_t recv(int sockfd, void *buf, size_t len, int flags);
+```
+
+Recibe datos desde el socket.
+
+* Lee desde el buffer de recepción del kernel
+* Copia los datos a memoria de usuario
+
+Puede devolver:
+
+* Menos datos que los solicitados
+* 0 si la conexión fue cerrada
+
+---
+
+## 3.8 `close()`
+
+```c
+int close(int sockfd);
+```
+
+Cierra el socket.
+
+En TCP:
+
+* Inicia el cierre de conexión (envío de FIN)
+* Libera recursos del kernel
+
+---
+
+# 4. Estructuras de datos clave
+
+## 4.1 `struct sockaddr`
+
+Estructura genérica para direcciones:
+
+```c
+struct sockaddr {
+    sa_family_t sa_family;
+    char sa_data[14];
+};
+```
+
+Se usa como base para otras estructuras específicas.
+
+---
+
+## 4.2 `struct sockaddr_in` (IPv4)
+
+```c
+struct sockaddr_in {
+    short sin_family;
+    unsigned short sin_port;
+    struct in_addr sin_addr;
+};
+```
+
+* `sin_family`: `AF_INET`
+* `sin_port`: puerto (en formato de red)
+* `sin_addr`: dirección IP
+
+---
+
+# 5. Manejo de datos: punteros vs red
+
+Las funciones como `send()` y `recv()` utilizan punteros, pero:
+
+* Los punteros no se envían por la red
+* Solo se copian los bytes a los que apuntan
+
+Ejemplo:
+
+```c
+char *msg = "Hola";
+send(sockfd, msg, 4, 0);
+```
+
+Lo que se envía son los bytes:
+
+```text
+48 6F 6C 61
+```
+
+El receptor reconstruye los datos en su propia memoria.
+
+---
+
+# 6. Buffers del kernel
+
+Cada socket mantiene:
+
+* Buffer de envío (send buffer)
+* Buffer de recepción (recv buffer)
+
+Flujo de datos:
+
+```text
+Programa → send() → buffer kernel → red → buffer kernel → recv() → programa
+```
+
+---
+
+# 7. TCP vs UDP
+
+## TCP (`SOCK_STREAM`)
+
+* Orientado a conexión
+* Garantiza entrega
+* Ordena los datos
+* Maneja retransmisión
+
+## UDP (`SOCK_DGRAM`)
+
+* Sin conexión
+* No garantiza entrega
+* No asegura orden
+
+---
+
+# 8. Consideraciones importantes
+
+## 8.1 TCP es un flujo de bytes
+
+No existen mensajes como tal. Ejemplo:
+
+```c
+send("Hola");
+send("Mundo");
+```
+
+El receptor puede recibir:
+
+```text
+Holamundo
+```
+
+o fragmentos parciales.
+
+---
+
+## 8.2 `send()` no garantiza entrega inmediata
+
+Solo indica que los datos fueron copiados al buffer del kernel.
+
+---
+
+## 8.3 `recv()` puede devolver menos datos
+
+Es necesario usar bucles si se espera una cantidad específica.
+
+---
+
+## 8.4 Endianness
+
+Los enteros deben convertirse a formato de red:
+
+* `htons()`, `htonl()`
+* `ntohs()`, `ntohl()`
+
+---
+
+# 9. Modelo conceptual
+
+```text
+Aplicación
+   ↓
+sys/socket.h (API)
+   ↓
+Kernel (buffers, estado, colas)
+   ↓
+TCP/UDP
+   ↓
+Red
+```
+
+---
+
+# 10. Conclusión
+
+La librería `<sys/socket.h>` no implementa la comunicación en sí, sino que proporciona una interfaz para interactuar con el subsistema de red del kernel. Comprender su funcionamiento implica entender:
+
+* Cómo el kernel maneja buffers y estados
+* Que la red transmite bytes, no estructuras ni punteros
+* Que TCP es un flujo continuo, no orientado a mensajes
+
+Este entendimiento es esencial para diseñar protocolos de aplicación correctos sobre sockets.
+Con esta libreria podemos garantizar el cumplimiento del tree way handshaking, la retrasmicion y el ordenamiento de paquetes, ya que cuando la usamos esta se encarga de manejar todo en el protocolo tcp en la pila del kernell, entonces hace todo lo que se esperaria de TCP en el sistema operativo. 
