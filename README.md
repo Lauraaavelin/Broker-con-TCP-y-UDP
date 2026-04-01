@@ -66,8 +66,6 @@ Este proyecto consiste en una plataforma de distribución de noticias de fútbol
 
 
 ## 3. Sockets TCP
-Aquí tienes una documentación clara y profunda lista para usar en tu README sobre `<sys/socket.h>`:
-
 ---
 
 # `<sys/socket.h>` – Documentación técnica
