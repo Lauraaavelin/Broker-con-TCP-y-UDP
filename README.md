@@ -44,25 +44,25 @@ Este proyecto consiste en una plataforma de distribución de noticias de fútbol
 
 # Documentacion Librerias (UDP):
 
-socket(): El programa le pide al sistema operativo que abra un canal de comunicación. Usamos el dominio AF_INET para internet y SOCK_DGRAM porque UDP no requiere una conexión fija, devolviendo un identificador para manejar el tráfico.
+    socket(): El programa le pide al sistema operativo que abra un canal de comunicación. Usamos el dominio AF_INET para internet y SOCK_DGRAM porque UDP no requiere una conexión fija, devolviendo un identificador para manejar el tráfico.
 
-close(): Al terminar la ejecución, esta función libera el identificador del socket. Esto es fundamental para que el puerto no quede "bloqueado" y el sistema operativo pueda reutilizarlo inmediatamente.
+    close(): Al terminar la ejecución, esta función libera el identificador del socket. Esto es fundamental para que el puerto no quede "bloqueado" y el sistema operativo pueda reutilizarlo inmediatamente.
 
-memset(): Antes de asignar una dirección, llenamos la estructura de memoria con ceros. Esto evita que queden datos "basura" de otros procesos que podrían causar que los mensajes se envíen a una dirección equivocada.
+    memset(): Antes de asignar una dirección, llenamos la estructura de memoria con ceros. Esto evita que queden datos "basura" de otros procesos que podrían causar que los mensajes se envíen a una dirección equivocada.
 
-sockaddr_in: Es el contenedor donde guardamos la IP y el puerto. Actúa como el sobre de una carta, indicando exactamente a dónde debe ir la información en la red.
+    sockaddr_in: Es el contenedor donde guardamos la IP y el puerto. Actúa como el sobre de una carta, indicando exactamente a dónde debe ir la información en la red.
 
-htons(): Los ordenadores y las redes a veces leen los números al revés (orden de bytes). Esta función traduce el número de puerto al lenguaje universal de la red para que la comunicación sea compatible.
+    htons(): Los ordenadores y las redes a veces leen los números al revés (orden de bytes). Esta función traduce el número de puerto al lenguaje universal de la red para que la comunicación sea compatible.
 
-inet_addr(): Convierte la dirección IP que escribimos como texto (ej. "127.0.0.1") a un código binario que las tarjetas de red pueden procesar para el envío de paquetes.
+    inet_addr(): Convierte la dirección IP que escribimos como texto (ej. "127.0.0.1") a un código binario que las tarjetas de red pueden procesar para el envío de paquetes.
 
-bind(): Esta función es exclusiva del Broker. Con ella, el programa "se adueña" de un puerto específico en la máquina. Así, cualquier mensaje que llegue a ese puerto será entregado directamente a nuestro proceso.
+    bind(): Esta función es exclusiva del Broker. Con ella, el programa "se adueña" de un puerto específico en la máquina. Así, cualquier mensaje que llegue a ese puerto será entregado directamente a nuestro proceso.
 
-sendto(): Como en UDP no existe una conexión permanente, cada vez que mandamos un mensaje debemos decirle a la red quién es el destinatario. Por eso, pasamos la dirección completa en cada envío.
+    sendto(): Como en UDP no existe una conexión permanente, cada vez que mandamos un mensaje debemos decirle a la red quién es el destinatario. Por eso, pasamos la dirección completa en cada envío.
 
-recvfrom(): El programa se queda esperando hasta que llega un paquete. Lo interesante es que, además de darnos el mensaje, nos dice automáticamente quién lo envió, permitiendo al Broker saber a qué dirección debe responder.
+    recvfrom(): El programa se queda esperando hasta que llega un paquete. Lo interesante es que, además de darnos el mensaje, nos dice automáticamente quién lo envió, permitiendo al Broker saber a qué dirección debe responder.
 
-snprintf(): Antes de enviar cualquier dato, usamos esta función para construir el mensaje combinando el tipo de comando (SUB o PUB) con el nombre del partido. Es la que da formato a nuestra comunicación antes de que salga al cable de red.
+    snprintf(): Antes de enviar cualquier dato, usamos esta función para construir el mensaje combinando el tipo de comando (SUB o PUB) con el nombre del partido. Es la que da formato a nuestra comunicación antes de que salga al cable de red.
 
 
 ## 3. Sockets TCP
