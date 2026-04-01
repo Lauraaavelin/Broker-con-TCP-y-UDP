@@ -428,6 +428,8 @@ Suscribirse al partido Colombia vs Francia
 
 Ya con eso le llegaran los mensaje sde dichos partidos 
 
+SOLO se úede subscribir a esos partidos porque son los predeterminados en el broker
+
 ## Publicador 
 
 Este les pedirá un nombre de un archivo puedes ejegir entre "publicacionoes.txt" o "publicacionesASCUN.txt" 
