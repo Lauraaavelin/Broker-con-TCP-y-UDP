@@ -391,5 +391,49 @@ La librería `<sys/socket.h>` no implementa la comunicación en sí, sino que pr
 * Que la red transmite bytes, no estructuras ni punteros
 * Que TCP es un flujo continuo, no orientado a mensajes
 
-Este entendimiento es esencial para diseñar protocolos de aplicación correctos sobre sockets.
 Con esta libreria podemos garantizar el cumplimiento del tree way handshaking, la retrasmicion y el ordenamiento de paquetes, ya que cuando la usamos esta se encarga de manejar todo en el protocolo tcp en la pila del kernell, entonces hace todo lo que se esperaria de TCP en el sistema operativo. 
+
+---
+# ¿CÓMO EJECUTAR? 
+
+Para poder correr todo lo primero que hacemos es ubicarnos desde la consola en la carpeta bin. Con el nombre de cada uno de los archivos 
+* Si estas en windos puedes usar WSL para poder  correr los archivos o puedes usar maquinas virtuales
+  ```
+  >> wsl
+  
+  >> ./broker_tcp 
+  ```
+  
+* En el ambiente de linux puedes ejectuar sin ningun problema como normalmente se hace.
+
+El primero en ejecutarse debe ser el broker y luego los subscriptores y por último los publicadores.
+
+## Subscriptor 
+Para ese debes mandar alguno de estos tres mensajes; debende de a que partidos te quieres subscribir, puede ser uno o más y solo una vez por partido: 
+
+Suscribirse al partido Millonarios vs Santa fe 
+ ```
+   SUB Santa_Fe_vs_Millonarios
+  ```
+
+Ssuscribirse al partido Uniandes vs Javeriana
+ ```
+     SUB Uniandes_vs_Javeriana
+  ```
+
+Suscribirse al partido Colombia vs Francia 
+ ```
+   SUB Colombia_vs_Francia
+  ```
+
+Ya con eso le llegaran los mensaje sde dichos partidos 
+
+## Publicador 
+
+Esyte les pedirá un nombre de un archivo puedes ejegir entre "publicacionoes.txt" o "publicacionesASCUN.txt" 
+
+Luego se publicaran los contenidos de dichos txt.  Puede verificar en los subscriptores correspondientes.
+Le saldra la pregunta de si quiere publicar más cosas si es asi escriba 's' de lo contrario 'n' 
+
+
+
