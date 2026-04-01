@@ -430,8 +430,9 @@ Ya con eso le llegaran los mensaje sde dichos partidos
 
 ## Publicador 
 
-Esyte les pedirá un nombre de un archivo puedes ejegir entre "publicacionoes.txt" o "publicacionesASCUN.txt" 
+Este les pedirá un nombre de un archivo puedes ejegir entre "publicacionoes.txt" o "publicacionesASCUN.txt" 
 
+Estos documentos deben estar en la MISMA carpeta de donde esten los ejecutables; por ahora se encuentran en el bin.
 Luego se publicaran los contenidos de dichos txt.  Puede verificar en los subscriptores correspondientes.
 Le saldra la pregunta de si quiere publicar más cosas si es asi escriba 's' de lo contrario 'n' 
 
